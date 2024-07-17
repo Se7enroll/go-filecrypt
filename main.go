@@ -3,10 +3,12 @@ package main
 import (
 	"fmt"
 	"os"
+
+	filecrypt "github.com/se7enroll/go-filecrypt/lib"
+	"golang.org/x/term"
 )
 
 func main() {
-	// Ensure all
 	if len(os.Args) < 2 {
 		printHelp()
 		os.Exit(0)
@@ -32,27 +34,52 @@ func printHelp() {
 	fmt.Println("\tGo run . encrypt /path/to/file")
 	fmt.Println("")
 	fmt.Println("Commands:")
-	fmt.Println("\t encrypt \t Encrypts the file using a password.")
-	fmt.Println("\t decrypt \t Decrypts the file using a password.")
+	fmt.Println("\t encrypt \t Encrypts the file (in place) using a password.")
+	fmt.Println("\t decrypt \t Decrypts the file (in place) using a password.")
 	fmt.Println("\t help \t Displays the help text..")
 }
 
 func encryptHandle() {
+	if len(os.Args) < 3 {
+		println("Missing file path argument.")
+		os.Exit(0)
+	}
+	file := os.Args[2]
+	if !validateFile(file) {
+		println("File not found")
+	}
 
+	password := getPassword()
+	fmt.Println("\nEncrypting fiel....")
+	filecrypt.Encrypt(file, password)
+	fmt.Println("Successfully encrypte the file.")
 }
 
 func decryptHandle() {
+	if len(os.Args) < 3 {
+		println("Missing file path argument.")
+		os.Exit(0)
+	}
+	file := os.Args[2]
+	if !validateFile(file) {
+		println("File not found")
+	}
 
+	password := getPassword()
+	fmt.Println("\nDecrypting...")
+	filecrypt.Decrypt(file, password)
+	fmt.Println("\nFile successfully decrypted.")
 }
 
-func getPassword() {
-
+func getPassword() []byte {
+	fmt.Print("Enter password:")
+	password, _ := term.ReadPassword(0)
+	return password
 }
 
-func validatePassword() {
-
-}
-
-func validateFile() {
-
+func validateFile(file string) bool {
+	if _, err := os.Stat(file); os.IsNotExist(err) {
+		return false
+	}
+	return true
 }
